@@ -1,0 +1,14 @@
+Makefile
+*.in
+*.o
+aclocal.m4
+autom4te.cache/
+compile
+config.*
+configure
+depcomp
+install-sh
+missing
+src/.deps/
+src/gl2json
+stamp-h1
