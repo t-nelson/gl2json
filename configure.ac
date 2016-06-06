@@ -24,7 +24,7 @@ if ! test -d "$with_glroot"; then
   AC_MSG_ERROR([$with_glroot: No such directory])
 fi
 
-AC_CHECK_LIB([json],   [main],, AC_MSG_ERROR([Missing a required library!]))
+AC_CHECK_LIB([json-c], [main],, AC_MSG_ERROR([Missing a required library!]))
 
 AC_CONFIG_FILES([Makefile]
                 [src/Makefile]

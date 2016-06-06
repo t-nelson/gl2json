@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <json/json.h>
+#include <json-c/json.h>
 #include "glconf.h"
 
 #define eprintf(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
