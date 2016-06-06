@@ -20,9 +20,9 @@ AC_ARG_WITH([glroot],
             [with_glroot=$withval],
             [with_glroot=/jail/glftpd])
 
-if ! test -d "$with_glroot"; then
-  AC_MSG_ERROR([$with_glroot: No such directory])
-fi
+GL_SOURCE_DIR="$with_glroot/bin/sources"
+CPPFLAGS="$CPPFLAGS -I$GL_SOURCE_DIR"
+AC_CHECK_HEADER([glconf.h], [], AC_MSG_ERROR([Missing glconf.h. See --with-glroot]))
 
 AC_CHECK_LIB([json-c], [main],, AC_MSG_ERROR([Missing a required library!]))
 
@@ -30,7 +30,7 @@ AC_CONFIG_FILES([Makefile]
                 [src/Makefile]
                )
 
-AM_CPPFLAGS="-Wall -Werror -I$with_glroot/bin/sources"
+AM_CPPFLAGS="-Wall -Werror"
 
 AC_SUBST(AM_CPPFLAGS)
 
