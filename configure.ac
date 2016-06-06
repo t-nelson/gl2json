@@ -15,11 +15,10 @@ if test "$SAVE_CFLAGS" = "x"; then
   CFLAGS=""
 fi
 
-DEFAULT_GLROOT="/jail/glftpd"
 AC_ARG_WITH([glroot],
-            ["Specify path to glroot (default: $DEFAULT_GLROOT")],
+            [AC_HELP_STRING([--with-glroot], [Specify path to glroot (default: /jail/glftpd)])],
             [with_glroot=$withval],
-            [with_glroot=$DEFAULT_GLROOT])
+            [with_glroot=/jail/glftpd])
 
 if ! test -d "$with_glroot"; then
   AC_MSG_ERROR([$with_glroot: No such directory])
