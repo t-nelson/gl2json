@@ -16,7 +16,7 @@ if test "$SAVE_CFLAGS" = "x"; then
 fi
 
 AC_ARG_WITH([glroot],
-            [AC_HELP_STRING([--with-glroot], [Specify path to glroot (default: /jail/glftpd)])],
+            [AC_HELP_STRING([--with-glroot=GLROOT], [Specify path to glroot (default: /jail/glftpd)])],
             [with_glroot=$withval],
             [with_glroot=/jail/glftpd])
 
