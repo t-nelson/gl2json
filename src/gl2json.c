@@ -142,16 +142,16 @@ int main(int argc, char* argv[])
     if (read_config(&conf))
     {
       int shm_id;
-      if (-1 != (shm_id = shmget(conf.shm_key, 0, 0)))
+      struct json_object* array_obj;
+      if (NULL != (array_obj = json_object_new_array()))
       {
-        struct shmid_ds stat_buf = {};
-        if (-1 != shmctl(shm_id, SHM_STAT, &stat_buf))
+        if (-1 != (shm_id = shmget(conf.shm_key, 0, 0)))
         {
-          void* shm_ptr;
-          if (((void*)-1) != (shm_ptr = shmat(shm_id, NULL, SHM_RDONLY)))
+          struct shmid_ds stat_buf = {};
+          if (-1 != shmctl(shm_id, SHM_STAT, &stat_buf))
           {
-            struct json_object* array_obj;
-            if (NULL != (array_obj = json_object_new_array()))
+            void* shm_ptr;
+            if (((void*)-1) != (shm_ptr = shmat(shm_id, NULL, SHM_RDONLY)))
             {
               size_t                i;
               size_t                num_users;
@@ -217,22 +217,25 @@ int main(int argc, char* argv[])
                   }
                 }
               }
-              printf("%s\n", json_object_to_json_string_ext(array_obj, conf.json_flags));
-              json_object_put(array_obj);
               rc = 0;
+              shmdt(shm_ptr);
             }
-            shmdt(shm_ptr);
           }
           else
             perror("shmat");
+          if (stat_buf.shm_cpid == getpid())
+            shmctl(shm_id, IPC_RMID, NULL);
         }
-        if (stat_buf.shm_cpid == getpid())
-          shmctl(shm_id, IPC_RMID, NULL);
+        else if (ENOENT == errno)
+        {
+          eprintf("shmget: No shared memory segment for key(0x%08X)\n", conf.shm_key);
+        }
+        else
+          perror("shmget");
+        if (0 == rc)
+          printf("%s\n", json_object_to_json_string_ext(array_obj, conf.json_flags));
+        json_object_put(array_obj);
       }
-      else if (ENOENT == errno)
-        eprintf("shmget: No shared memory segment for key(0x%08X)\n", conf.shm_key);
-      else
-        perror("shmget");
     }
   }
 
