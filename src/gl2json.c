@@ -129,7 +129,8 @@ bool read_config(struct config* conf)
 
 int main(int argc, char* argv[])
 {
-  struct config conf = {};
+  int           rc    = 1;
+  struct config conf  = {};
   
   conf.shm_key     = 0x0000DEAD;
   conf.config_file = default_conf;
@@ -218,6 +219,7 @@ int main(int argc, char* argv[])
               }
               printf("%s\n", json_object_to_json_string_ext(array_obj, conf.json_flags));
               json_object_put(array_obj);
+              rc = 0;
             }
             shmdt(shm_ptr);
           }
@@ -234,6 +236,6 @@ int main(int argc, char* argv[])
     }
   }
 
-  return 0;
+  return rc;
 }
 
