@@ -25,7 +25,6 @@ struct config
   const char* config_file;
   int         json_flags;
   size_t      max_users;
-  bool        old_v4;
 };
 
 void usage()
@@ -35,7 +34,6 @@ void usage()
           "   -h                        Print this help message.\n"
           "   -p                        Output human-readable JSON.\n"
           "   -r /path/to/glftpd.conf   Use alternate config file.\n"
-          "   -4                        GL <= v2.04. Missing SHM OK.\n"
         );
 }
 
@@ -46,7 +44,7 @@ bool parse_args(int argc, char* argv[], struct config* conf)
 
   assert(conf);
 
-  while (-1 != (arg = getopt(argc, argv, "hpr:4")))
+  while (-1 != (arg = getopt(argc, argv, "hpr:")))
   {
     switch (arg)
     {
@@ -55,9 +53,6 @@ bool parse_args(int argc, char* argv[], struct config* conf)
         break;
       case 'r':
         conf->config_file = optarg;
-        break;
-      case '4':
-        conf->old_v4 = true;
         break;
       case 'h':
       case '?':
@@ -141,7 +136,6 @@ int main(int argc, char* argv[])
   conf.config_file = default_conf;
   conf.json_flags  = 0;
   conf.max_users   = SIZE_MAX;
-  conf.old_v4      = false;
 
   if (parse_args(argc, argv, &conf))
   {
@@ -234,10 +228,7 @@ int main(int argc, char* argv[])
         }
         else if (ENOENT == errno)
         {
-          if (conf.old_v4)
-            rc = 0;
-          else
-            eprintf("shmget: No shared memory segment for key(0x%08X)\n", conf.shm_key);
+          eprintf("shmget: No shared memory segment for key(0x%08X)\n", conf.shm_key);
         }
         else
           perror("shmget");
