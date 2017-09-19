@@ -66,14 +66,17 @@ bool parse_args(int argc, char* argv[], struct config* conf)
   return rc;
 }
 
-bool read_config(struct config* conf)
+bool read_config(const char* filename, struct config* conf)
 {
   FILE* fp;
   bool  rc = true;
+  const char* fn;
 
   assert(conf);
 
-  if (NULL != (fp = fopen(conf->config_file, "r")))
+  fn = (NULL != filename) ? filename : conf->config_file;
+
+  if (NULL != (fp = fopen(fn, "r")))
   {
     char*   line      = NULL;
     size_t  line_len  = 0;
@@ -112,16 +115,18 @@ bool read_config(struct config* conf)
               rc = false;
             }
           }
+          else if (0 == strcmp(key, "include"))
+            rc &= read_config(val, conf);
         }
       }
     }
     free(line);
     fclose(fp);
   }
-  else if (conf->config_file != default_conf)
+  else
   {
     rc = false;
-    perror(conf->config_file);
+    eprintf("%s %s: %s\n", (fn == filename) ? "Include" : "Config", fn, strerror(errno));
   }
 
   return rc;
@@ -140,7 +145,7 @@ int main(int argc, char* argv[])
 
   if (parse_args(argc, argv, &conf))
   {
-    if (read_config(&conf))
+    if (read_config(NULL, &conf))
     {
       int shm_id;
       struct json_object* array_obj;
