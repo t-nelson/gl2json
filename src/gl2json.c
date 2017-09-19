@@ -44,7 +44,7 @@ bool parse_args(int argc, char* argv[], struct config* conf)
 
   assert(conf);
 
-  while (-1 != (arg = getopt(argc, argv, "hpr:")))
+  while (rc && -1 != (arg = getopt(argc, argv, "hpr:")))
   {
     switch (arg)
     {
