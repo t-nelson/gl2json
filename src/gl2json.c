@@ -66,6 +66,51 @@ bool parse_args(int argc, char* argv[], struct config* conf)
   return rc;
 }
 
+static const char* const white_space_chars = " \t\n\r\v";
+
+char* ltrim(char* s, size_t* len)
+{
+  size_t next = strspn(s, white_space_chars);
+
+  if (next <= *len)
+  {
+    *len -= next;
+    return &s[next];
+  }
+  return NULL;
+}
+
+bool split_config_line(char *line, size_t line_len,
+    const char **key, const char **val)
+{
+  bool rc = false;
+
+  if ((0 < line_len) && ('\n' == line[line_len - 1]))
+  {
+    line_len--;
+    line[line_len] = '\0';
+  }
+
+  *key = line = ltrim(line, &line_len);
+
+  if (('\0' != *line) && ('#' != *line))
+  {
+    size_t key_end = strcspn(line, white_space_chars);
+
+    if ((key_end < line_len) && ('\0' != line[key_end]))
+    {
+      line[key_end] =   '\0';
+      line          =   line + (key_end + 1);
+      line_len      -=  (key_end + 1);
+
+      *val = ltrim(line, &line_len);
+
+      rc = true;
+    }
+  }
+  return rc;
+}
+
 bool read_config(const char* filename, struct config* conf)
 {
   FILE* fp;
@@ -80,14 +125,13 @@ bool read_config(const char* filename, struct config* conf)
   {
     char*   line      = NULL;
     size_t  line_len  = 0;
-    while (rc && -1 != getline(&line, &line_len, fp))
+    ssize_t nread;
+    while (rc && (-1 != (nread = getline(&line, &line_len, fp))))
     {
-      if ('#' != line[0])
+      const char  *key;
+      const char  *val;
+      if (split_config_line(line, nread, &key, &val))
       {
-        char  key[32]   = {};
-        char  val[512]  = {};
-        if (2 == sscanf(line, "%s %[^\n]", key, val))
-        {
           if (0 == strcmp(key, "ipc_key"))
           {
             bool  good_val  = false;
@@ -117,7 +161,6 @@ bool read_config(const char* filename, struct config* conf)
           }
           else if (0 == strcmp(key, "include"))
             rc &= read_config(val, conf);
-        }
       }
     }
     free(line);
