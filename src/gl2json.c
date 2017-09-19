@@ -131,6 +131,7 @@ int main(int argc, char* argv[])
 {
   int           rc    = 1;
   struct config conf  = {};
+  bool          print_json = false;
   
   conf.shm_key     = 0x0000DEAD;
   conf.config_file = default_conf;
@@ -157,6 +158,8 @@ int main(int argc, char* argv[])
               size_t                num_users;
               const struct ONLINE*  users     = shm_ptr;
               
+              print_json = true;
+
               num_users = min(conf.max_users, stat_buf.shm_segsz / sizeof(struct ONLINE));
 
               for (i = 0; i < num_users; i++)
@@ -217,7 +220,6 @@ int main(int argc, char* argv[])
                   }
                 }
               }
-              rc = 0;
               shmdt(shm_ptr);
             }
           }
@@ -229,11 +231,17 @@ int main(int argc, char* argv[])
         else if (ENOENT == errno)
         {
           eprintf("shmget: No shared memory segment for key(0x%08X)\n", conf.shm_key);
+          print_json = true;
         }
         else
           perror("shmget");
-        if (0 == rc)
+
+        if (print_json)
+        {
           printf("%s\n", json_object_to_json_string_ext(array_obj, conf.json_flags));
+          rc = 0;
+        }
+
         json_object_put(array_obj);
       }
     }
