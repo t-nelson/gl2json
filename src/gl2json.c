@@ -227,9 +227,10 @@ int main(int argc, char* argv[])
               }
               shmdt(shm_ptr);
             }
+            else
+              perror("shmat");
           }
-          else
-            perror("shmat");
+
           if (stat_buf.shm_cpid == getpid())
             shmctl(shm_id, IPC_RMID, NULL);
         }
