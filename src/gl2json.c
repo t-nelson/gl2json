@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
         if (-1 != (shm_id = shmget(conf.shm_key, 0, 0)))
         {
           struct shmid_ds stat_buf = {};
-          if (-1 != shmctl(shm_id, SHM_STAT, &stat_buf))
+          if (-1 != shmctl(shm_id, IPC_STAT, &stat_buf))
           {
             void* shm_ptr;
             if (((void*)-1) != (shm_ptr = shmat(shm_id, NULL, SHM_RDONLY)))
